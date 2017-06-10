@@ -1,0 +1,24 @@
+{
+  "name": "authentication-service",
+  "version": "0.0.0",
+  "description": "Authentication service",
+  "main": "./dist/app.js",
+  "scripts": {
+    "start": "node ./dist/app.js",
+    "test": "mocha -recursive ./dist/test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Nhor/authentication-service.git"
+  },
+  "keywords": [
+    "authentication",
+    "service"
+  ],
+  "author": "Norbert Mieczkowski",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Nhor/authentication-service/issues"
+  },
+  "homepage": "https://github.com/Nhor/authentication-service#readme"
+}
