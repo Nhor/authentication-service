@@ -1,0 +1,29 @@
+class Config {
+
+  static get name() { return 'authentication-service'; }
+
+  static get version() { return '0.0.0'; }
+
+  static get port() { return 8000; }
+
+  static get databaseHost() { return '127.0.0.1'; }
+
+  static get databasePort() { return 5432; }
+
+  static get databaseName() { return 'database'; }
+
+  static get databaseUser() { return 'user'; }
+
+  static get databasePassword() { return 'password'; }
+
+  static get databaseSchema() { return 'authentication_service'; }
+
+  static get redisHost() { return '127.0.0.1'; }
+
+  static get redisPort() { return 6379; }
+
+  static get logToFile() { return false; }
+}
+
+try       { module.exports = Config; }
+catch (e) { define(() => Config);    }
