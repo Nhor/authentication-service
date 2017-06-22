@@ -8,8 +8,11 @@ const replace = require('gulp-replace');
 const babel = require('gulp-babel');
 const uglify = require('gulp-uglify');
 const rename = require('gulp-rename');
+const mocha = require('gulp-mocha');
 const spawn = require('child_process').spawn;
 let nodeProcess;
+let exitOnFinish = true;
+let exitCode = 0;
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -184,6 +187,20 @@ gulp.task('backend:build', [
 
 
 ////////////////////////////////////////////////////////////////////////////////
+//                                    TEST                                    //
+////////////////////////////////////////////////////////////////////////////////
+gulp.task('test:js', () => gulp
+  .src('./src/test/**/*.js')
+  .pipe(babel({presets: ['es2015']}))
+  .pipe(uglify())
+  .pipe(gulp.dest('./dist/test')));
+
+gulp.task('test:build', [
+  'test:js'
+]);
+
+
+////////////////////////////////////////////////////////////////////////////////
 //                                   COMMON                                   //
 ////////////////////////////////////////////////////////////////////////////////
 gulp.task('common:js', () => gulp
@@ -204,19 +221,32 @@ gulp.task('build', [
   'configuration:apply',
   'migrations:apply',
   'backend:build',
+  'test:build',
   'common:build'
 ]);
 
 gulp.task('server', ['build'], callback => {
+  exitOnFinish = false;
   nodeProcess = spawn('node', ['./dist/app.js'], {stdio: 'inherit'});
   setTimeout(callback, 1000);
 });
 
 gulp.task('kill', callback => {
+  exitOnFinish = true;
   nodeProcess && nodeProcess.kill();
   setTimeout(callback, 1000);
 });
 
+gulp.task('test', ['server'], () => gulp
+  .src(['./dist/test/**/*.js', '!./dist/test/Helpers.js'])
+  .pipe(mocha())
+  .on('error', () => { exitCode = 1; gulp.start('kill'); })
+  .on('end',   () => { exitCode = 0; gulp.start('kill'); }));
+
 gulp.task('default', [
   'server'
 ]);
+
+gulp.on('stop', () => exitOnFinish
+  ? process.nextTick(() => process.exit(exitCode))
+  : undefined);

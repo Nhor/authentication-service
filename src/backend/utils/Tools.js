@@ -1,4 +1,6 @@
 const path = require('path');
+const _ = require('lodash');
+const Error = require('./Error');
 
 class Tools {
 
@@ -9,42 +11,6 @@ class Tools {
    */
   static pathnameAppendToProjectRoot(pathname = '') {
     return path.join(__dirname, '..', '..', '..', pathname);
-  }
-
-  /**
-   * Check if given string is URL encoded.
-   * @param {String} str - String to check.
-   * @return {Boolean} `true` if given string is URL encoded, `false` if not.
-   */
-  static isUrlEncoded(str) {
-    let isUrlEncoded;
-    try       { isUrlEncoded = decodeURIComponent(str) !== str; }
-    catch (e) { isUrlEncoded = false; }
-    return isUrlEncoded;
-  }
-
-  /**
-   * URL encode given string.
-   * @param {String} str - String to URL encode.
-   * @return {String} URL encoded string.
-   */
-  static urlEncode(str) {
-    let urlEncoded;
-    try       { urlEncoded = encodeURIComponent(str); }
-    catch (e) { urlEncoded = str; }
-    return urlEncoded;
-  }
-
-  /**
-   * URL decode given string.
-   * @param {String} str - String to URL decode.
-   * @return {String} URL decoded string.
-   */
-  static urlDecode(str) {
-    let urlDecoded;
-    try       { urlDecoded = decodeURIComponent(str); }
-    catch (e) { urlDecoded = str; }
-    return urlDecoded;
   }
 
   /**
@@ -60,6 +26,31 @@ class Tools {
     res.locals.type = type;
     res.locals.body = body;
     next();
+  }
+
+  /**
+   * Send response with failed validation result.
+   * @param {express.Response} res - Express response object.
+   * @param {Function} next - Express next function.
+   * @param {Object} validation - Validation result.
+   */
+  static validationFailed(res, next, validation) {
+    let status = 400;
+    let body = {success: validation.success, err: _.map(validation.err, 'code')};
+    Tools.prepareResponse(res, next, status, body);
+  }
+
+  /**
+   * Send response with failed action result.
+   * @param {express.Response} res - Express response object.
+   * @param {Function} next - Express next function.
+   * @param {Error} err - Error object.
+   */
+  static actionFailed(res, next, err) {
+    let isErrorCustom = _.get(err, 'isCustom');
+    let status = isErrorCustom ? 400 : 500;
+    let body = {success: false, err: [isErrorCustom ? err.code : Error.Code.UNKNOWN]};
+    Tools.prepareResponse(res, next, status, body);
   }
 }
 

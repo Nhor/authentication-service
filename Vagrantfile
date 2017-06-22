@@ -34,9 +34,6 @@ Vagrant.configure("2") do |config|
     cd /etc/redis
     sed -i -E "s/^daemonize(.*)/daemonize yes/g" redis.conf
 
-    # Gulp
-    sudo npm i -g gulp
-
     # Project
     mkdir /home/vagrant/authentication-service
     sudo chown vagrant /home/vagrant/authentication-service

@@ -27,14 +27,25 @@ class RecordNotFound extends ExtendableError {
   }
 }
 
+class RecordAlreadyExists extends ExtendableError {
+  constructor(code) {
+    super('Record already exists');
+    this.code = code;
+    this.isCustom = true;
+  }
+}
+
 let Code = {
   UNKNOWN: 0,
-  INVALID_USERNAME_FORMAT: 1,
-  INVALID_PASSWORD_FORMAT: 2,
-  INVALID_TYPE_FORMAT: 3,
-  INVALID_USERNAME_OR_PASSWORD: 4
+  INVALID_EMAIL_FORMAT: 1,
+  INVALID_USERNAME_FORMAT: 2,
+  INVALID_PASSWORD_FORMAT: 3,
+  INVALID_USERNAME_OR_PASSWORD: 4,
+  EMAIL_IN_USE: 5,
+  USERNAME_IN_USE: 6
 };
 
 module.exports.InvalidFormat = InvalidFormat;
 module.exports.RecordNotFound = RecordNotFound;
+module.exports.RecordAlreadyExists = RecordAlreadyExists;
 module.exports.Code = Code;

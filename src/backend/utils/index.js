@@ -1,3 +1,4 @@
+module.exports.Crypt = require('./Crypt');
 module.exports.Database = require('./Database');
 module.exports.Error = require('./Error');
 module.exports.Logger = require('./Logger');
