@@ -37,7 +37,7 @@ Vagrant.configure("2") do |config|
     # Project
     mkdir /home/vagrant/authentication-service
     sudo chown vagrant /home/vagrant/authentication-service
-    echo 'alias sync="cp -r /home/vagrant/shared/{docker,src,.gitignore,gulpfile.js,package.json,README.md,Vagrantfile} /home/vagrant/authentication-service"' >> /home/vagrant/.bashrc
+    echo 'alias sync="cp -r /home/vagrant/shared/{docker,src,.gitignore,gulpfile.js,package.json,config.json,config.json.sample,README.md,Vagrantfile} /home/vagrant/authentication-service"' >> /home/vagrant/.bashrc
 
   SHELL
 end

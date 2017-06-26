@@ -50,7 +50,7 @@ jspm_packages
 .vagrant
 
 # Configuration files
-src/Config.js
+config.json
 
 # Build
 dist

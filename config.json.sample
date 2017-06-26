@@ -1,0 +1,12 @@
+{
+  "port": 8000,
+  "databaseHost": "127.0.0.1",
+  "databasePort": 5432,
+  "databaseName": "vagrant",
+  "databaseUser": "vagrant",
+  "databasePassword": "vagrant",
+  "databaseSchema": "authentication_service",
+  "redisHost": "127.0.0.1",
+  "redisPort": 6379,
+  "logToFile": false
+}

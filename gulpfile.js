@@ -1,4 +1,5 @@
 const pjson = require('./package.json');
+const config = require('./config.json');
 const fs = require('fs');
 const _ = require('lodash');
 const pg = require('pg');
@@ -20,16 +21,16 @@ let exitCode = 0;
 ////////////////////////////////////////////////////////////////////////////////
 let name = pjson.name;
 let version = pjson.version;
-let port;
-let databaseHost;
-let databasePort;
-let databaseName;
-let databaseUser;
-let databasePassword;
-let databaseSchema;
-let redisHost;
-let redisPort;
-let logToFile;
+let port = config.port;
+let databaseHost = config.databaseHost;
+let databasePort = config.databasePort;
+let databaseName = config.databaseName;
+let databaseUser = config.databaseUser;
+let databasePassword = config.databasePassword;
+let databaseSchema = config.databaseSchema;
+let redisHost = config.redisHost;
+let redisPort = config.redisPort;
+let logToFile = config.logToFile;
 
 gulp.task('configuration:apply', () => gulp
   .src('./src/Config.js.sample')
