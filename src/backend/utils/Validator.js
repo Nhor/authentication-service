@@ -14,6 +14,15 @@ class Validator {
   }
 
   /**
+   * Check if value is a valid integer.
+   * @param {any} val - Value to validate.
+   * @return {Boolean} `true` if validation was successful, `false` otherwise.
+   */
+  static IntegerField(val) {
+    return _.isInteger(val);
+  }
+
+  /**
    * Check if value is a valid not empty string.
    * @param {any} val - Value to validate.
    * @return {Boolean} `true` if validation was successful, `false` otherwise.

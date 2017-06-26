@@ -27,7 +27,10 @@ class Admin {
       `RETURNING id;`;
     let args = [email, username, password];
     return Promise
-      .all([this._doesExist({email: email}), this._doesExist({username: username})])
+      .all([
+        this._database.doesExist('admin', {email: email}),
+        this._database.doesExist('admin', {username: username})
+      ])
       .then(doesExist => {
         if (doesExist[0])
           throw new utils.Error.RecordAlreadyExists(utils.Error.Code.EMAIL_IN_USE);
@@ -37,27 +40,6 @@ class Admin {
       })
       .then(hashedPassword => this._database.execute(sql, args))
       .then(result => parseInt(_.get(_.first(result), 'id'), 10));
-  }
-
-  /**
-   * Does admin with given conditions exist.
-   * @param {Object} conditions - Object containing field names as keys and related values.
-   * @return {Promise} Resolved promise with `true` if admin exists,
-   *                   resolved promise with `false` if not.
-   * @private
-   */
-  _doesExist(conditions) {
-    let where = '';
-    let args = [];
-    _.each(conditions, (value, field) => {
-      where += `${_.size(args) ? ' AND ' : ''}${field} = $${_.size(args) + 1}`;
-      args.push(value);
-    });
-    let sql = `SELECT EXISTS(SELECT 1 FROM ${this._database.schema}.admin ` +
-      `WHERE ${where});`;
-    return this._database
-      .execute(sql, args)
-      .then(result => _.get(_.first(result.rows), 'exists'));
   }
 }
 

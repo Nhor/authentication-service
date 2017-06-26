@@ -225,7 +225,7 @@ gulp.task('build', [
   'common:build'
 ]);
 
-gulp.task('server', ['build'], callback => {
+gulp.task('server', callback => {
   exitOnFinish = false;
   nodeProcess = spawn('node', ['./dist/app.js'], {stdio: 'inherit'});
   setTimeout(callback, 1000);
@@ -243,9 +243,7 @@ gulp.task('test', ['server'], () => gulp
   .on('error', () => { exitCode = 1; gulp.start('kill'); })
   .on('end',   () => { exitCode = 0; gulp.start('kill'); }));
 
-gulp.task('default', [
-  'server'
-]);
+gulp.task('default', ['build'], () => gulp.start('server'));
 
 gulp.on('stop', () => exitOnFinish
   ? process.nextTick(() => process.exit(exitCode))

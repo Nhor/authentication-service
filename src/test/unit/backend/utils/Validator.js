@@ -28,6 +28,25 @@ describe('backend/utils/Validator', () => {
       chai.expect(utils.Validator.EmailField(Helpers.random(Helpers.RANDOM_TYPE.EMAIL))).to.be.true);
   });
 
+  describe('IntegerField', () => {
+    it('should return `false` for `undefined`', () =>
+      chai.expect(utils.Validator.IntegerField(undefined)).to.be.false);
+    it('should return `false` for `null`', () =>
+      chai.expect(utils.Validator.IntegerField(null)).to.be.false);
+    it('should return `false` for boolean', () =>
+      chai.expect(utils.Validator.IntegerField(true)).to.be.false);
+    it('should return `false` for float number', () =>
+      chai.expect(utils.Validator.IntegerField(123.456)).to.be.false);
+    it('should return `false` for object', () =>
+      chai.expect(utils.Validator.IntegerField({})).to.be.false);
+    it('should return `false` for empty string', () =>
+      chai.expect(utils.Validator.IntegerField('')).to.be.false);
+    it('should return `false` for some string', () =>
+      chai.expect(utils.Validator.IntegerField('some string')).to.be.false);
+    it('should return `true` for integer number', () =>
+      chai.expect(utils.Validator.IntegerField(123)).to.be.true);
+  });
+
   describe('NotEmptyStringField', () => {
     it('should return `false` for `undefined`', () =>
       chai.expect(utils.Validator.NotEmptyStringField(undefined)).to.be.false);
