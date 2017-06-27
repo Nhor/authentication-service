@@ -25,7 +25,7 @@ class Admin {
     let sql = `INSERT INTO ${this._database.schema}.admin ` +
       `(email, username, password) VALUES ($1, $2, $3) ` +
       `RETURNING id;`;
-    let args = [email, username, password];
+    let args = [email, username];
     return Promise
       .all([
         this._database.doesExist('admin', {email: email}),
@@ -38,7 +38,7 @@ class Admin {
           throw new utils.Error.RecordAlreadyExists(utils.Error.Code.USERNAME_IN_USE);
         return utils.Crypt.hashPlainText(password);
       })
-      .then(hashedPassword => this._database.execute(sql, args))
+      .then(hashedPassword => this._database.execute(sql, _.concat(args, [hashedPassword])))
       .then(result => parseInt(_.get(_.first(result), 'id'), 10));
   }
 }
