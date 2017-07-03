@@ -9,6 +9,21 @@ class AdminPermission {
    */
   constructor(database) {
     this._database = database;
+
+    this.CODE = {
+      CREATE_ADMINS: 'CREATE_ADMINS',
+      DELETE_ADMINS: 'DELETE_ADMINS',
+      GRANT_ADMIN_PERMISSIONS: 'GRANT_ADMIN_PERMISSIONS',
+      REVOKE_ADMIN_PERMISSIONS: 'REVOKE_ADMIN_PERMISSIONS',
+      CREATE_SERVICES: 'CREATE_SERVICES',
+      DELETE_SERVICES: 'DELETE_SERVICES',
+      CREATE_USERS: 'CREATE_USERS',
+      DELETE_USERS: 'DELETE_USERS',
+      CREATE_USER_PERMISSIONS: 'CREATE_USER_PERMISSIONS',
+      DELETE_USER_PERMISSIONS: 'DELETE_USER_PERMISSIONS',
+      GRANT_USER_PERMISSIONS: 'GRANT_USER_PERMISSIONS',
+      REVOKE_USER_PERMISSIONS: 'REVOKE_USER_PERMISSIONS'
+    };
   }
 
   /**
@@ -38,6 +53,26 @@ class AdminPermission {
         return this._database.execute(sql, args);
       })
       .then(result => {});
+  }
+
+  /**
+   * Check if admin has permission with given code.
+   * @param {String} adminPermissionCode - Admin permission code.
+   * @param {Number} adminId - Admin identifier.
+   * @return {Promise} Resolved promise on success when admin has given permission,
+   *                   rejected promise with error when there is missing permission.
+   */
+  has(adminPermissionCode, adminId) {
+    let sql = `SELECT EXISTS(SELECT 1 FROM ${this._database.schema}.admin_permission_xref AS apx ` +
+      `JOIN ${this._database.schema}.admin_permission AS ap ON apx.admin_permission_id = ap.id ` +
+      `WHERE ap.code = $1 AND apx.admin_id = $2);`;
+    let args = [adminPermissionCode, adminId];
+    return this._database
+      .execute(sql, args)
+      .then(result => {
+        if (!_.get(_.first(result), 'exists'))
+          throw new utils.Error.AuthorizationFailed(utils.Error.Code.NOT_AUTHORIZED);
+      });
   }
 }
 

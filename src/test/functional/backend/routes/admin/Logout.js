@@ -21,8 +21,10 @@ describe('backend/routes/admin/Logout', () => {
             adminUsername,
             hashedPassword
           ]))
-        .then(rows => adminId = parseInt(_.get(_.first(rows), 'id')))
-        .then(() => Helpers.generatePseudoRandomString(32))
+        .then(rows => {
+          adminId = parseInt(_.get(_.first(rows), 'id'));
+          return Helpers.generatePseudoRandomString(32);
+        })
         .then(pseudoRandomString => {
           sessionId = pseudoRandomString;
           return Helpers.redisTransaction([

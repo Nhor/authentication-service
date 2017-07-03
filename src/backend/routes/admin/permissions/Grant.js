@@ -16,11 +16,14 @@ class Grant {
     if (!validation.success)
       return utils.Tools.validationFailed(res, next, validation);
 
+    let sessionId = req.headers.authorization;
     let adminPermissionId = req.body.id;
     let adminId = req.params.adminId;
 
-    context.models.adminPermission
-      .grant(adminPermissionId, adminId)
+    context.models.admin
+      .authenticate(sessionId)
+      .then(id => context.models.adminPermission.has(context.models.adminPermission.CODE.GRANT_ADMIN_PERMISSIONS, id))
+      .then(() => context.models.adminPermission.grant(adminPermissionId, adminId))
       .then(() => utils.Tools.actionSucceeded(res, next))
       .catch(err => utils.Tools.actionFailed(res, next, err, context.logger));
   }
