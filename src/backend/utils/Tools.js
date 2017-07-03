@@ -41,14 +41,29 @@ class Tools {
   }
 
   /**
+   * Send response with succeeded action result.
+   * @param {express.Response} res - Express response object.
+   * @param {Function} next - Express next function.
+   * @param {Object} [content] - Optional response content object, defaults to `{}`.
+   */
+  static actionSucceeded(res, next, content = {}) {
+    let status = 200;
+    let body = _.merge({success: true}, content);
+    Tools.prepareResponse(res, next, status, body);
+  }
+
+  /**
    * Send response with failed action result.
    * @param {express.Response} res - Express response object.
    * @param {Function} next - Express next function.
    * @param {Error} err - Error object.
+   * @param {Logger} logger - `Logger` class instance.
    */
-  static actionFailed(res, next, err) {
+  static actionFailed(res, next, err, logger) {
     let isErrorCustom = _.get(err, 'isCustom');
-    let status = isErrorCustom ? 400 : 500;
+    if (!isErrorCustom)
+      logger.error(err && err.message);
+    let status = isErrorCustom ? err.httpStatus : 500;
     let body = {success: false, err: [isErrorCustom ? err.code : Error.Code.UNKNOWN]};
     Tools.prepareResponse(res, next, status, body);
   }

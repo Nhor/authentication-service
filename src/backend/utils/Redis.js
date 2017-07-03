@@ -1,3 +1,4 @@
+const _ = require('lodash');
 const redis = require('redis');
 
 class Redis {
@@ -8,46 +9,35 @@ class Redis {
    * @param {Number} port - Redis server port.
    */
   constructor(host, port) {
-    this.client = redis.createClient({
+    this._client = redis.createClient({
       host: host,
       port: port
     });
   }
 
   /**
-   * Assign object to a given key.
-   * @param {String} key - Cache key.
-   * @param {Object} value - Object to assign to a given key.
-   * @param {Number} ttl = Time to live in minutes.
-   * @return {Promise} Resolved promise on success or
+   * Query a transaction with specified action to Redis.
+   * @param {Array} actions - Nested array containing arrays with commands and
+   *                          arguments for redis actions to perform.
+   * @return {Promise} Resolved promise with Redis replies array on success,
    *                   rejected promise with error on failure.
    */
-  setObject(key, value, ttl) {
-    return new Promise((resolve, reject) => {
-      this.client.set(key, JSON.stringify(value), 'EX', ttl * 60, (err, reply) => {
-        if (err)
-          return reject(err);
-        resolve();
-      });
-    });
+  transaction(actions) {
+    return new Promise((resolve, reject) =>
+      this._client
+        .multi(actions)
+        .exec((err, replies) => err ? reject(err) : resolve(replies)));
   }
 
   /**
-   * Get object associated with a given key.
-   * @param {String} key - Cache key.
-   * @return {Promise} Resolved promise with object associated with a given key or
-   *                   rejected promise with error.
+   * Get value for a given key from Redis.
+   * @param {String} key - Key.
+   * @return {Promise} Resolved promise with value associated with key on success,
+   *                   rejected promise with error on failure.
    */
-  getObject(key) {
-    return new Promise((resolve, reject) => {
-      this.client.get(key, (err, reply) => {
-        if (err)
-          return reject(err);
-        if (!reply)
-          return resolve();
-        resolve(JSON.parse(reply.toString()));
-      });
-    });
+  get(key) {
+    return new Promise((resolve, reject) =>
+      this._client.get(key, (err, reply) => err ? reject(err) : resolve(reply)));
   }
 }
 

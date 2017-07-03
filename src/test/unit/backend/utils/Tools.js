@@ -42,23 +42,50 @@ describe('backend/utils/Tools', () => {
     });
   });
 
+  describe('actionSucceeded', () => {
+    it('should use `prepareResponse` to send a response with status 200 and provided content', () => {
+      let res = {locals: {}};
+      let next = sinon.spy();
+      utils.Tools.actionSucceeded(res, next, {content: 'content'});
+      chai.expect(res)
+        .to.deep.equal({locals: {status: 200, body: {success: true, content: 'content'}, type: 'json'}});
+      chai.expect(next.calledOnce)
+        .to.be.true;
+    });
+    it('should use `prepareResponse` to send a response with status 200 and empty content', () => {
+      let res = {locals: {}};
+      let next = sinon.spy();
+      utils.Tools.actionSucceeded(res, next);
+      chai.expect(res)
+        .to.deep.equal({locals: {status: 200, body: {success: true}, type: 'json'}});
+      chai.expect(next.calledOnce)
+        .to.be.true;
+    });
+  });
+
   describe('actionFailed', () => {
     it('should use `prepareResponse` to send a response with status 400 and custom error codes array', () => {
       let res = {locals: {}};
       let next = sinon.spy();
-      utils.Tools.actionFailed(res, next, new utils.Error.InvalidFormat(utils.Error.Code.INVALID_USERNAME_OR_PASSWORD));
+      let logger = {error: sinon.spy()};
+      utils.Tools.actionFailed(res, next, new utils.Error.InvalidFormat(utils.Error.Code.INVALID_USERNAME_OR_PASSWORD), logger);
       chai.expect(res)
         .to.deep.equal({locals: {status: 400, body: {success: false, err: [4]}, type: 'json'}});
       chai.expect(next.calledOnce)
         .to.be.true;
+      chai.expect(logger.error.called)
+        .to.be.false;
     });
     it('should use `prepareResponse` to send a response with status 500 and unknown error code', () => {
       let res = {locals: {}};
       let next = sinon.spy();
-      utils.Tools.actionFailed(res, next, new Error());
+      let logger = {error: sinon.spy()};
+      utils.Tools.actionFailed(res, next, new Error(), logger);
       chai.expect(res)
         .to.deep.equal({locals: {status: 500, body: {success: false, err: [0]}, type: 'json'}});
       chai.expect(next.calledOnce)
+        .to.be.true;
+      chai.expect(logger.error.calledOnce)
         .to.be.true;
     });
   });

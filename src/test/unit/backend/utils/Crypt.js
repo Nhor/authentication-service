@@ -21,4 +21,13 @@ describe('backend/utils/Crypt', () => {
       .then(hashedText => utils.Crypt.comparePlainTextWithHash('some string', hashedText))
       .then(result => chai.expect(result).to.be.true));
   });
+
+  describe('generatePseudoRandomString', () => {
+    it('should generate pseudo random hex string with 10 chars', () => utils.Crypt
+      .generatePseudoRandomString(10)
+      .then(result => chai.expect(result).to.match(/^[0-9a-f]{10}$/)));
+    it('should generate pseudo random hex string with 20 chars', () => utils.Crypt
+      .generatePseudoRandomString(20)
+      .then(result => chai.expect(result).to.match(/^[0-9a-f]{20}$/)));
+  });
 });

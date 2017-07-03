@@ -11,11 +11,30 @@ class ExtendableError extends Error {
   }
 }
 
+class AuthenticationFailed extends ExtendableError {
+  constructor(code) {
+    super('Authentication failed');
+    this.code = code;
+    this.isCustom = true;
+    this.httpStatus = 403;
+  }
+}
+
+class AuthorizationFailed extends ExtendableError {
+  constructor(code) {
+    super('Authorization failed');
+    this.code = code;
+    this.isCustom = true;
+    this.httpStatus = 401;
+  }
+}
+
 class InvalidFormat extends ExtendableError {
   constructor(code) {
     super('Invalid format');
     this.code = code;
     this.isCustom = true;
+    this.httpStatus = 400;
   }
 }
 
@@ -24,6 +43,7 @@ class RecordNotFound extends ExtendableError {
     super('Record not found');
     this.code = code;
     this.isCustom = true;
+    this.httpStatus = 400;
   }
 }
 
@@ -32,6 +52,7 @@ class RecordAlreadyExists extends ExtendableError {
     super('Record already exists');
     this.code = code;
     this.isCustom = true;
+    this.httpStatus = 400;
   }
 }
 
@@ -47,9 +68,12 @@ let Code = {
   ADMIN_PERMISSION_NOT_FOUND: 8,
   ADMIN_PERMISSION_ALREADY_GRANTED: 9,
   INVALID_ID_FORMAT: 10,
-  INVALID_ADMIN_ID_FORMAT: 11
+  INVALID_ADMIN_ID_FORMAT: 11,
+  INVALID_SESSION_ID: 12
 };
 
+module.exports.AuthenticationFailed = AuthenticationFailed;
+module.exports.AuthorizationFailed = AuthorizationFailed;
 module.exports.InvalidFormat = InvalidFormat;
 module.exports.RecordNotFound = RecordNotFound;
 module.exports.RecordAlreadyExists = RecordAlreadyExists;

@@ -1,4 +1,5 @@
 const _ = require('lodash');
+const bcrypt = require('bcrypt');
 const pg = require('pg');
 const request = require('request');
 const randomatic = require('randomatic');
@@ -100,6 +101,15 @@ class Helpers {
       case 'USERNAME':
         return randomatic('aA', 8);
     }
+  }
+
+  /**
+   * Hash plain text.
+   * @param {String} plainText - Plain text to hash.
+   * @return {Promise} Resolved promise with hashed text.
+   */
+  static hashPlainText(plainText) {
+    return bcrypt.hash(plainText, 10);
   }
 }
 

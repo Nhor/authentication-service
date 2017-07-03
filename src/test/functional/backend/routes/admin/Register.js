@@ -6,6 +6,7 @@ describe('backend/routes/admin/Register', () => {
     let adminEmail;
     let adminUsername;
     let adminId;
+
     it('should fail on validation for missing email', () =>
       Helpers
         .request(Helpers.REQUEST_METHOD.POST, '/api/v1/admin/register', {
@@ -17,6 +18,7 @@ describe('backend/routes/admin/Register', () => {
           chai.expect(res.body.success).to.be.false;
           chai.expect(res.body.err).to.deep.equal([1]);
         }));
+
     it('should fail on validation for invalid password format', () =>
       Helpers
         .request(Helpers.REQUEST_METHOD.POST, '/api/v1/admin/register', {
@@ -29,6 +31,7 @@ describe('backend/routes/admin/Register', () => {
           chai.expect(res.body.success).to.be.false;
           chai.expect(res.body.err).to.deep.equal([3]);
         }));
+
     it('should succeed for valid data', () => {
       adminEmail = Helpers.random(Helpers.RANDOM_TYPE.EMAIL);
       adminUsername = Helpers.random(Helpers.RANDOM_TYPE.USERNAME);
@@ -45,6 +48,7 @@ describe('backend/routes/admin/Register', () => {
           chai.expect(res.body.adminId).to.be.a('number');
         });
     });
+
     it('should respond with `EMAIL_IN_USE` error for the same email', () =>
       Helpers
         .request(Helpers.REQUEST_METHOD.POST, '/api/v1/admin/register', {
@@ -57,6 +61,7 @@ describe('backend/routes/admin/Register', () => {
           chai.expect(res.body.success).to.be.false;
           chai.expect(res.body.err).to.deep.equal([5]);
         }));
+
     it('should respond with `USERNAME_IN_USE` error for the same username', () =>
       Helpers
         .request(Helpers.REQUEST_METHOD.POST, '/api/v1/admin/register', {
@@ -69,6 +74,7 @@ describe('backend/routes/admin/Register', () => {
           chai.expect(res.body.success).to.be.false;
           chai.expect(res.body.err).to.deep.equal([6]);
         }));
+
     after('should delete created admin', () => Helpers
       .databaseExecute(`DELETE FROM ${Helpers.DATABASE_SCHEMA}.admin WHERE id = $1;`, [adminId]));
   });

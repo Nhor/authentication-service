@@ -5,8 +5,6 @@ class Grant {
 
   static POST(req, res, next) {
     let context = res.locals.context;
-    let status;
-    let body;
 
     req.params.adminId = parseInt(req.params.adminId, 10);
 
@@ -23,16 +21,8 @@ class Grant {
 
     context.models.adminPermission
       .grant(adminPermissionId, adminId)
-      .then(() => {
-        status = 200;
-        body = {success: true};
-        utils.Tools.prepareResponse(res, next, status, body);
-      })
-      .catch(err => {
-        if (!_.get(err, 'isCustom'))
-          context.logger.error(err.message);
-        utils.Tools.actionFailed(res, next, err);
-      });
+      .then(() => utils.Tools.actionSucceeded(res, next))
+      .catch(err => utils.Tools.actionFailed(res, next, err, context.logger));
   }
 }
 
