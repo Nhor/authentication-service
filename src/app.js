@@ -12,6 +12,7 @@ let router = new utils.Router(logger, {logger, database, redis, models: {
   adminPermission: new models.AdminPermission(database)}});
 router.addRoute('POST', '/admin/register', routes.admin.Register.POST);
 router.addRoute('POST', '/admin/login', routes.admin.Login.POST);
+router.addRoute('POST', '/admin/logout', routes.admin.Logout.POST);
 router.addRoute('POST', '/admin/:adminId/permissions/grant', routes.admin.permissions.Grant.POST);
 
 let server = new utils.Server(Config.name, Config.version, Config.port);

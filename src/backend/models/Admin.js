@@ -71,6 +71,33 @@ class Admin {
   }
 
   /**
+   * Logout admin with given identifier and session identifier.
+   * @param {Number} id - Admin identifier.
+   * @param {String} sessionId - Admin session identifier.
+   * @return {Promise} Resolved promise on success,
+   *                   rejected promise with error on failure.
+   */
+  logout(id, sessionId) {
+    return this._deleteSession(id, sessionId);
+  }
+
+  /**
+   * Authenticate admin with given session identifier.
+   * @param {String} sessionId - Admin session identifier.
+   * @return {Promise} Resolved promise with admin identifier on success,
+   *                   rejected promise with error on failure.
+   */
+  authenticate(sessionId) {
+    return this
+      ._getId(sessionId)
+      .then(adminId => {
+        if (!adminId)
+          throw new utils.Error.AuthenticationFailed(utils.Error.Code.INVALID_SESSION_ID);
+        return adminId;
+      });
+  }
+
+  /**
    * Create a new session for admin with given identifier.
    * @param {Number} id - Admin identifier.
    * @return {Promise} Resolved promise with session identifier on success,
@@ -78,17 +105,32 @@ class Admin {
    * @private
    */
   _createSession(id) {
-    let sessionIdentifier;
+    let sessionId;
     return utils.Crypt
       .generatePseudoRandomString(32)
       .then(pseudoRandomString => {
-        sessionIdentifier = pseudoRandomString;
+        sessionId = pseudoRandomString;
         return this._redis.transaction([
-          ['set', `session:admin:${id}`, sessionIdentifier],
-          ['set', `admin:session:${sessionIdentifier}`, id.toString()]
+          ['set', `session:admin:${id}`, sessionId],
+          ['set', `admin:session:${sessionId}`, id.toString()]
         ]);
       })
-      .then(replies => sessionIdentifier);
+      .then(replies => sessionId);
+  }
+
+  /**
+   * Delete existing session for admin with given identifier and session identifier.
+   * @param {Number} id - Admin identifier.
+   * @param {String} sessionId - Admin session identifier.
+   * @return {Promise} Resolved promise on success,
+   *                   rejected promise with error on failure.
+   * @private
+   */
+  _deleteSession(id, sessionId) {
+    return this._redis.transaction([
+      ['del', `session:admin:${id}`],
+      ['del', `admin:session:${sessionId}`]
+    ]);
   }
 
   /**

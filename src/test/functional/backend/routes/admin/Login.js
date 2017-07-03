@@ -84,7 +84,11 @@ describe('backend/routes/admin/Login', () => {
           chai.expect(res.body.sessionId).to.be.equal(sessionId);
         }));
 
-    after('should delete created admin', () => Helpers
-      .databaseExecute(`DELETE FROM ${Helpers.DATABASE_SCHEMA}.admin WHERE id = $1;`, [adminId]));
+    after('should delete created admin and session', () => Helpers
+      .databaseExecute(`DELETE FROM ${Helpers.DATABASE_SCHEMA}.admin WHERE id = $1;`, [adminId])
+      .then(() => Helpers.redisTransaction([
+        ['del', `session:admin:${adminId}`],
+        ['del', `admin:session:${sessionId}`]
+      ])));
   });
 });
