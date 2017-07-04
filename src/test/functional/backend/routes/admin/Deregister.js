@@ -3,7 +3,7 @@ const chai = require('chai');
 const Helpers = require('../../../../Helpers');
 
 describe('backend/routes/admin/Deregister', () => {
-  describe('POST', () => {
+  describe('DELETE', () => {
     let adminId;
     let sessionId;
 
@@ -58,7 +58,7 @@ describe('backend/routes/admin/Deregister', () => {
     it('should silently grant admin the \'DELETE_ADMINS\' permission to pass the test', () => Helpers
       .databaseExecute(`INSERT INTO ${Helpers.DATABASE_SCHEMA}.admin_permission_xref ` +
         `(admin_id, admin_permission_id) SELECT $1, id FROM ${Helpers.DATABASE_SCHEMA}.admin_permission ` +
-        `WHERE ${Helpers.DATABASE_SCHEMA}.admin_permission.code = $2`, [adminId, 'DELETE_ADMINS']));
+        `WHERE ${Helpers.DATABASE_SCHEMA}.admin_permission.code = $2;`, [adminId, 'DELETE_ADMINS']));
 
     it('should succeed for valid data', () =>
       Helpers

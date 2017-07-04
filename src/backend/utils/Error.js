@@ -70,7 +70,8 @@ let Code = {
   INVALID_ID_FORMAT: 10,
   INVALID_ADMIN_ID_FORMAT: 11,
   INVALID_SESSION_ID: 12,
-  NOT_AUTHORIZED: 13
+  NOT_AUTHORIZED: 13,
+  ADMIN_PERMISSION_ALREADY_REVOKED: 14
 };
 
 module.exports.AuthenticationFailed = AuthenticationFailed;

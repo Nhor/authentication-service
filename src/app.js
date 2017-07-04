@@ -15,6 +15,7 @@ router.addRoute('DELETE', '/admin/:id/deregister', routes.admin.Deregister.DELET
 router.addRoute('POST', '/admin/login', routes.admin.Login.POST);
 router.addRoute('POST', '/admin/logout', routes.admin.Logout.POST);
 router.addRoute('POST', '/admin/:adminId/permissions/grant', routes.admin.permissions.Grant.POST);
+router.addRoute('DELETE', '/admin/:adminId/permissions/revoke/:id', routes.admin.permissions.Revoke.DELETE);
 
 let server = new utils.Server(Config.name, Config.version, Config.port);
 server.addRouter('/api/v1', router);

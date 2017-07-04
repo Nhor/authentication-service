@@ -56,6 +56,35 @@ class AdminPermission {
   }
 
   /**
+   * Revoke a permission from an existing admin.
+   * @param {String} adminPermissionId - Permission identifier.
+   * @param {Number} adminId - Admin identifier.
+   * @return {Promise} Resolved promise on success,
+   *                   rejected promise with error on failure.
+   */
+  revoke(adminPermissionId, adminId) {
+    let sql = `DELETE FROM ${this._database.schema}.admin_permission_xref ` +
+      'WHERE admin_id = $1 AND admin_permission_id = $2;';
+    let args = [adminId, adminPermissionId];
+    return Promise
+      .all([
+        this._database.doesExist('admin_permission', {id: adminPermissionId}),
+        this._database.doesExist('admin', {id: adminId}),
+        this._database.doesExist('admin_permission_xref', {admin_id: adminId, admin_permission_id: adminPermissionId})
+      ])
+      .then(doesExist => {
+        if (!doesExist[0])
+          throw new utils.Error.RecordNotFound(utils.Error.Code.ADMIN_PERMISSION_NOT_FOUND);
+        else if (!doesExist[1])
+          throw new utils.Error.RecordNotFound(utils.Error.Code.ADMIN_NOT_FOUND);
+        else if (!doesExist[2])
+          throw new utils.Error.RecordAlreadyExists(utils.Error.Code.ADMIN_PERMISSION_ALREADY_REVOKED);
+        return this._database.execute(sql, args);
+      })
+      .then(result => {});
+  }
+
+  /**
    * Check if admin has permission with given code.
    * @param {String} adminPermissionCode - Admin permission code.
    * @param {Number} adminId - Admin identifier.
