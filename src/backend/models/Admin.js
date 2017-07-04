@@ -43,6 +43,30 @@ class Admin {
   }
 
   /**
+   * Remove admin with given identifier.
+   * @param {Number} id - Admin identifier.
+   * @return {Promise} Resolved promise on success,
+   *                   rejected promise with error on failure.
+   */
+  remove(id) {
+    let transaction = [{
+      sql: `DELETE FROM ${this._database.schema}.admin_permission_xref WHERE admin_id = $1;`,
+      args: [id]
+    }, {
+      sql: `DELETE FROM ${this._database.schema}.admin WHERE id = $1 RETURNING id;`,
+      args: [id]
+    }];
+    return this._database
+      .transaction(transaction)
+      .then(results => {
+        if (!_.get(_.first(_.nth(results, 1)), 'id'))
+          throw new utils.Error.RecordNotFound(Error.Code.ADMIN_NOT_FOUND);
+        return this._getSession(id);
+      })
+      .then(sessionId => sessionId ? this._deleteSession(id, sessionId) : undefined);
+  }
+
+  /**
    * Login admin with given credentials.
    * @param {String} username - Admin username or email (both are accepted).
    * @param {String} password - Plain text admin password.

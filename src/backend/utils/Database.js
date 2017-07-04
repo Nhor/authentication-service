@@ -36,10 +36,40 @@ class Database {
       .connect()
       .then(client => client
         .query(sql, args)
-        .then(res =>
-          result = _.map(res.rows, row => _.mapKeys(row, (value, key) => _.camelCase(key))))
+        .then(res => result = this._getRows(res))
         .then(() => client.release())
         .then(() => result));
+  }
+
+  /**
+   * Perform a transaction with provided actions.
+   * @param {Array} actions - Array containing objects with `sql` and `args` to execute.
+   * @return {Promise} Resolved promise with array of consecutive results rows on success,
+   *                   rejected promise with error on failure.
+   */
+  transaction(actions) {
+    let results = [];
+    return this._pool
+      .connect()
+      .then(client => client
+        .query('BEGIN')
+        .then(() => new Promise((resolve, reject) => {
+          let lastCall = _.size(actions) - 1;
+          let recursiveCall = currentCall => currentCall > lastCall
+            ? client
+              .query('COMMIT')
+              .then(() => resolve(results))
+              .catch(err => reject(err))
+            : client
+              .query(actions[currentCall].sql, actions[currentCall].args)
+              .then(res => {
+                results.push(this._getRows(res));
+                recursiveCall(currentCall + 1);
+              })
+              .catch(err => reject(err));
+          recursiveCall(0);
+        }))
+        .catch(err => client.query('ROLLBACK').then(() => { throw err; })));
   }
 
   /**
@@ -60,6 +90,16 @@ class Database {
     return this
       .execute(sql, args)
       .then(result => _.get(_.first(result), 'exists'));
+  }
+
+  /**
+   * Get rows from result object and rename all column names to camel case.
+   * @param {Object} result - Database result object.
+   * @return {Array} Array of result rows with columns in camel case.
+   * @private
+   */
+  _getRows(result) {
+    return _.map(result.rows, row => _.mapKeys(row, (value, key) => _.camelCase(key)));
   }
 }
 
