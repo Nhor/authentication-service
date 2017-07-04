@@ -14,12 +14,15 @@ class Register {
     if (!validation.success)
       return utils.Tools.validationFailed(res, next, validation);
 
+    let sessionId = req.headers.authorization;
     let email = req.body.email;
     let username = req.body.username;
     let password = req.body.password;
 
     context.models.admin
-      .create(email, username, password)
+      .authenticate(sessionId)
+      .then(adminId => context.models.adminPermission.has(context.models.adminPermission.CODE.CREATE_ADMINS, adminId))
+      .then(() => context.models.admin.create(email, username, password))
       .then(adminId => utils.Tools.actionSucceeded(res, next, {adminId}))
       .catch(err => utils.Tools.actionFailed(res, next, err, context.logger));
   }
