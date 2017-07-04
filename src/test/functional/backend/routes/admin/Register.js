@@ -1,5 +1,6 @@
 const chai = require('chai');
 const Helpers = require('../../../../Helpers');
+const Manager = require('../../../../Manager');
 
 describe('backend/routes/admin/Register', () => {
   describe('POST', () => {
@@ -75,7 +76,6 @@ describe('backend/routes/admin/Register', () => {
           chai.expect(res.body.err).to.deep.equal([6]);
         }));
 
-    after('should delete created admin', () => Helpers
-      .databaseExecute(`DELETE FROM ${Helpers.DATABASE_SCHEMA}.admin WHERE id = $1;`, [adminId]));
+    after('should delete created admin', () => Manager.removeAdmin(adminId));
   });
 });

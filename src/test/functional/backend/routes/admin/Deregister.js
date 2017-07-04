@@ -1,32 +1,19 @@
-const _ = require('lodash');
 const chai = require('chai');
 const Helpers = require('../../../../Helpers');
+const Manager = require('../../../../Manager');
 
 describe('backend/routes/admin/Deregister', () => {
   describe('DELETE', () => {
     let adminId;
     let sessionId;
 
-    before('should create a new admin and session', () => Helpers
-      .hashPlainText(Helpers.random(Helpers.RANDOM_TYPE.PASSWORD))
-      .then(hashedPassword => Helpers
-        .databaseExecute(`INSERT INTO ${Helpers.DATABASE_SCHEMA}.admin ` +
-          '(email, username, password) VALUES ($1, $2, $3) RETURNING id;', [
-          Helpers.random(Helpers.RANDOM_TYPE.EMAIL),
-          Helpers.random(Helpers.RANDOM_TYPE.USERNAME),
-          hashedPassword
-        ]))
-      .then(rows => {
-        adminId = parseInt(_.get(_.first(rows), 'id'));
-        return Helpers.generatePseudoRandomString(32);
+    before('should create a new admin and session', () => Manager
+      .createAdmin()
+      .then(admin => {
+        adminId = admin.id;
+        return Manager.createAdminSession(adminId);
       })
-      .then(pseudoRandomString => {
-        sessionId = pseudoRandomString;
-        return Helpers.redisTransaction([
-          ['set', `session:admin:${adminId}`, sessionId],
-          ['set', `admin:session:${sessionId}`, adminId.toString()]
-        ]);
-      }));
+      .then(id => sessionId = id));
 
     it('should respond with `INVALID_SESSION_ID` error for missing Authorization header', () =>
       Helpers
@@ -55,10 +42,8 @@ describe('backend/routes/admin/Deregister', () => {
           chai.expect(res.body.err).to.deep.equal([13]);
         }));
 
-    it('should silently grant admin the \'DELETE_ADMINS\' permission to pass the test', () => Helpers
-      .databaseExecute(`INSERT INTO ${Helpers.DATABASE_SCHEMA}.admin_permission_xref ` +
-        `(admin_id, admin_permission_id) SELECT $1, id FROM ${Helpers.DATABASE_SCHEMA}.admin_permission ` +
-        `WHERE ${Helpers.DATABASE_SCHEMA}.admin_permission.code = $2;`, [adminId, 'DELETE_ADMINS']));
+    it('should silently grant admin the \'DELETE_ADMINS\' permission to pass the test', () =>
+      Manager.grantAdminPermission(adminId, 'DELETE_ADMINS'));
 
     it('should succeed for valid data', () =>
       Helpers

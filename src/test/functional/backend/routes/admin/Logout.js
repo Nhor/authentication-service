@@ -1,32 +1,19 @@
-const _ = require('lodash');
 const chai = require('chai');
 const Helpers = require('../../../../Helpers');
+const Manager = require('../../../../Manager');
 
 describe('backend/routes/admin/Logout', () => {
   describe('POST', () => {
     let adminId;
     let sessionId;
 
-    before('should create a new admin and session', () => Helpers
-      .hashPlainText(Helpers.random(Helpers.RANDOM_TYPE.PASSWORD))
-      .then(hashedPassword => Helpers
-        .databaseExecute(`INSERT INTO ${Helpers.DATABASE_SCHEMA}.admin ` +
-          '(email, username, password) VALUES ($1, $2, $3) RETURNING id;', [
-          Helpers.random(Helpers.RANDOM_TYPE.EMAIL),
-          Helpers.random(Helpers.RANDOM_TYPE.USERNAME),
-          hashedPassword
-        ]))
-      .then(rows => {
-        adminId = parseInt(_.get(_.first(rows), 'id'));
-        return Helpers.generatePseudoRandomString(32);
+    before('should create a new admin and session', () => Manager
+      .createAdmin()
+      .then(admin => {
+        adminId = admin.id;
+        return Manager.createAdminSession(adminId);
       })
-      .then(pseudoRandomString => {
-        sessionId = pseudoRandomString;
-        return Helpers.redisTransaction([
-          ['set', `session:admin:${adminId}`, sessionId],
-          ['set', `admin:session:${sessionId}`, adminId.toString()]
-        ]);
-      }));
+      .then(id => sessionId = id));
 
     it('should respond with `INVALID_SESSION_ID` error for missing Authorization header', () =>
       Helpers
@@ -65,7 +52,6 @@ describe('backend/routes/admin/Logout', () => {
           chai.expect(res.body.err).to.deep.equal([12]);
         }));
 
-    after('should delete created admin', () => Helpers
-      .databaseExecute(`DELETE FROM ${Helpers.DATABASE_SCHEMA}.admin WHERE id = $1;`, [adminId]));
+    after('should delete created admin', () => Manager.removeAdmin(adminId));
   });
 });

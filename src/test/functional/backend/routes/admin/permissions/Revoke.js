@@ -1,34 +1,23 @@
 const _ = require('lodash');
 const chai = require('chai');
 const Helpers = require('../../../../../Helpers');
+const Manager = require('../../../../../Manager');
 
 describe('backend/routes/admin/permissions/Revoke', () => {
   describe('DELETE', () => {
     let adminId;
     let sessionId;
 
-    before('should create a new admin, admin permission xref and session', () => Helpers
-      .hashPlainText(Helpers.random(Helpers.RANDOM_TYPE.PASSWORD))
-      .then(hashedPassword => Helpers
-        .databaseExecute(`INSERT INTO ${Helpers.DATABASE_SCHEMA}.admin ` +
-          '(email, username, password) VALUES ($1, $2, $3) RETURNING id;', [
-          Helpers.random(Helpers.RANDOM_TYPE.EMAIL),
-          Helpers.random(Helpers.RANDOM_TYPE.USERNAME),
-          hashedPassword
-        ]))
-      .then(rows => {
-        adminId = parseInt(_.get(_.first(rows), 'id'));
-        return Helpers.databaseExecute(`INSERT INTO ${Helpers.DATABASE_SCHEMA}.admin_permission_xref ` +
-          `(admin_id, admin_permission_id) VALUES ($1, $2);`, [adminId, 1]);
-      })
-      .then(() => Helpers.generatePseudoRandomString(32))
-      .then(pseudoRandomString => {
-        sessionId = pseudoRandomString;
-        return Helpers.redisTransaction([
-          ['set', `session:admin:${adminId}`, sessionId],
-          ['set', `admin:session:${sessionId}`, adminId.toString()]
+    before('should create a new admin, admin permission xref and session', () => Manager
+      .createAdmin()
+      .then(admin => {
+        adminId = admin.id;
+        return Promise.all([
+          Manager.grantAdminPermission(adminId, 1),
+          Manager.createAdminSession(adminId)
         ]);
-      }));
+      })
+      .then(results => sessionId = _.nth(results, 1)));
 
     it('should fail on validation for invalid id', () =>
       Helpers
@@ -59,10 +48,8 @@ describe('backend/routes/admin/permissions/Revoke', () => {
           chai.expect(res.body.err).to.deep.equal([13]);
         }));
 
-    it('should silently grant admin the \'REVOKE_ADMIN_PERMISSIONS\' permission to pass the test', () => Helpers
-      .databaseExecute(`INSERT INTO ${Helpers.DATABASE_SCHEMA}.admin_permission_xref ` +
-        `(admin_id, admin_permission_id) SELECT $1, id FROM ${Helpers.DATABASE_SCHEMA}.admin_permission ` +
-        `WHERE ${Helpers.DATABASE_SCHEMA}.admin_permission.code = $2;`, [adminId, 'REVOKE_ADMIN_PERMISSIONS']));
+    it('should silently grant admin the \'REVOKE_ADMIN_PERMISSIONS\' permission to pass the test', () =>
+      Manager.grantAdminPermission(adminId, 'REVOKE_ADMIN_PERMISSIONS'));
 
     it('should succeed for valid data', () =>
       Helpers
@@ -81,12 +68,9 @@ describe('backend/routes/admin/permissions/Revoke', () => {
           chai.expect(res.body.err).to.deep.equal([14]);
         }));
 
-    after('should delete created admin, admin permission xrefs and session', () => Helpers
-      .databaseExecute(`DELETE FROM ${Helpers.DATABASE_SCHEMA}.admin_permission_xref WHERE admin_id = $1;`, [adminId])
-      .then(() => Helpers.databaseExecute(`DELETE FROM ${Helpers.DATABASE_SCHEMA}.admin WHERE id = $1;`, [adminId]))
-      .then(() => Helpers.redisTransaction([
-        ['del', `session:admin:${adminId}`],
-        ['del', `admin:session:${sessionId}`]
-      ])));
+    after('should delete created admin, admin permission xrefs and session', () => Manager
+      .revokeAllAdminPermissions(adminId)
+      .then(() => Manager.removeAdmin(adminId))
+      .then(() => Manager.removeAdminSession(adminId, sessionId)));
   });
 });

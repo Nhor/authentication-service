@@ -1,6 +1,6 @@
-const _ = require('lodash');
 const chai = require('chai');
 const Helpers = require('../../../../Helpers');
+const Manager = require('../../../../Manager');
 
 describe('backend/routes/admin/Login', () => {
   describe('POST', () => {
@@ -9,20 +9,13 @@ describe('backend/routes/admin/Login', () => {
     let adminPassword;
     let sessionId;
 
-    before('should create a new admin', () => {
-      adminUsername = Helpers.random(Helpers.RANDOM_TYPE.USERNAME);
-      adminPassword = Helpers.random(Helpers.RANDOM_TYPE.PASSWORD);
-      return Helpers
-        .hashPlainText(adminPassword)
-        .then(hashedPassword => Helpers
-          .databaseExecute(`INSERT INTO ${Helpers.DATABASE_SCHEMA}.admin ` +
-            '(email, username, password) VALUES ($1, $2, $3) RETURNING id;', [
-            Helpers.random(Helpers.RANDOM_TYPE.EMAIL),
-            adminUsername,
-            hashedPassword
-          ]))
-        .then(rows => adminId = parseInt(_.get(_.first(rows), 'id')));
-    });
+    before('should create a new admin', () => Manager
+      .createAdmin()
+      .then(admin => {
+        adminId = admin.id;
+        adminUsername = admin.username;
+        adminPassword = admin.password;
+      }));
 
     it('should fail on validation for missing password', () =>
       Helpers
@@ -84,11 +77,8 @@ describe('backend/routes/admin/Login', () => {
           chai.expect(res.body.sessionId).to.be.equal(sessionId);
         }));
 
-    after('should delete created admin and session', () => Helpers
-      .databaseExecute(`DELETE FROM ${Helpers.DATABASE_SCHEMA}.admin WHERE id = $1;`, [adminId])
-      .then(() => Helpers.redisTransaction([
-        ['del', `session:admin:${adminId}`],
-        ['del', `admin:session:${sessionId}`]
-      ])));
+    after('should delete created admin and session', () => Manager
+      .removeAdmin(adminId)
+      .then(() => Manager.removeAdminSession(adminId, sessionId)));
   });
 });
