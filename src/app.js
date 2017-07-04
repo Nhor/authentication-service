@@ -14,6 +14,7 @@ router.addRoute('POST', '/admin/register', routes.admin.Register.POST);
 router.addRoute('DELETE', '/admin/:id/deregister', routes.admin.Deregister.DELETE);
 router.addRoute('POST', '/admin/login', routes.admin.Login.POST);
 router.addRoute('POST', '/admin/logout', routes.admin.Logout.POST);
+router.addRoute('PUT', '/admin/change-password', routes.admin.ChangePassword.PUT);
 router.addRoute('POST', '/admin/:adminId/permissions/grant', routes.admin.permissions.Grant.POST);
 router.addRoute('DELETE', '/admin/:adminId/permissions/revoke/:id', routes.admin.permissions.Revoke.DELETE);
 

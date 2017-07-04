@@ -33,6 +33,16 @@ describe('backend/utils/Error', () => {
     });
   });
 
+  describe('InvalidValue', () => {
+    it('should create a correct `InvalidValue` error', () => {
+      let error = new utils.Error.InvalidValue(utils.Error.Code.INVALID_PASSWORD);
+      chai.expect(error.message).to.be.equal('Invalid value');
+      chai.expect(error.code).to.be.equal(utils.Error.Code.INVALID_PASSWORD);
+      chai.expect(error.httpStatus).to.be.equal(400);
+      chai.expect(error.isCustom).to.be.true;
+    });
+  });
+
   describe('RecordNotFound', () => {
     it('should create a correct `RecordNotFound` error', () => {
       let error = new utils.Error.RecordNotFound(utils.Error.Code.INVALID_USERNAME_OR_PASSWORD);

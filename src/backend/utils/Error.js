@@ -38,6 +38,15 @@ class InvalidFormat extends ExtendableError {
   }
 }
 
+class InvalidValue extends ExtendableError {
+  constructor(code) {
+    super('Invalid value');
+    this.code = code;
+    this.isCustom = true;
+    this.httpStatus = 400;
+  }
+}
+
 class RecordNotFound extends ExtendableError {
   constructor(code) {
     super('Record not found');
@@ -71,12 +80,16 @@ let Code = {
   INVALID_ADMIN_ID_FORMAT: 11,
   INVALID_SESSION_ID: 12,
   NOT_AUTHORIZED: 13,
-  ADMIN_PERMISSION_ALREADY_REVOKED: 14
+  ADMIN_PERMISSION_ALREADY_REVOKED: 14,
+  INVALID_PASSWORD: 15,
+  INVALID_OLD_PASSWORD_FORMAT: 16,
+  INVALID_NEW_PASSWORD_FORMAT: 17
 };
 
 module.exports.AuthenticationFailed = AuthenticationFailed;
 module.exports.AuthorizationFailed = AuthorizationFailed;
 module.exports.InvalidFormat = InvalidFormat;
+module.exports.InvalidValue = InvalidValue;
 module.exports.RecordNotFound = RecordNotFound;
 module.exports.RecordAlreadyExists = RecordAlreadyExists;
 module.exports.Code = Code;

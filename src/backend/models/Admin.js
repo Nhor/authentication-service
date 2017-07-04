@@ -122,6 +122,40 @@ class Admin {
   }
 
   /**
+   * Change password for admin with given identifier.
+   * @param {Number} id - Admin identifier.
+   * @param {String|null} oldPlainTextPassword - Old plain text password or `null`
+   *                                             in case of forgotten password.
+   * @param {String} newPlainTextPassword - New plain text password.
+   * @return {Promise} Resolved promise on success,
+   *                   rejected promise with error on failure.
+   */
+  changePassword(id, oldPlainTextPassword, newPlainTextPassword) {
+    let sql = `SELECT password FROM ${this._database.schema}.admin WHERE id = $1;`;
+    let args = [id];
+    return this._database
+      .execute(sql, args)
+      .then(result => {
+        let password = _.get(_.first(result), 'password');
+        if (!password)
+          throw new utils.Error.RecordNotFound(utils.Error.Code.ADMIN_NOT_FOUND);
+        return oldPlainTextPassword === null
+          ? Promise.resolve(true)
+          : utils.Crypt.comparePlainTextWithHash(oldPlainTextPassword, password);
+      })
+      .then(result => {
+        if (!result)
+          throw new utils.Error.InvalidValue(utils.Error.Code.INVALID_PASSWORD);
+        return utils.Crypt.hashPlainText(newPlainTextPassword);
+      })
+      .then(newHashedPassword => {
+        sql = `UPDATE ${this._database.schema}.admin SET password = $1 WHERE id = $2;`;
+        args = [newHashedPassword, id];
+        return this._database.execute(sql, args);
+      });
+  }
+
+  /**
    * Create a new session for admin with given identifier.
    * @param {Number} id - Admin identifier.
    * @return {Promise} Resolved promise with session identifier on success,
