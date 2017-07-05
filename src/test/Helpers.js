@@ -103,9 +103,11 @@ class Helpers {
 
   static get RANDOM_TYPE() {
     return {
+      CODE: 'CODE',
       EMAIL: 'EMAIL',
       LETTERS: 'LETTERS',
       PASSWORD: 'PASSWORD',
+      UPPERCASE_LETTERS: 'UPPERCASE_LETTERS',
       USERNAME: 'USERNAME'
     };
   }
@@ -117,12 +119,16 @@ class Helpers {
    */
   static random(type) {
     switch(type) {
+      case 'CODE':
+        return randomatic('?', 8, {chars: 'abcdefghijklmnopqrstuvwxyz0123456789_'});
       case 'EMAIL':
         return `${randomatic('a', 5)}@${randomatic('a', 6)}.${randomatic('a', 3)}`;
       case 'LETTERS':
         return randomatic('aA', 10);
       case 'PASSWORD':
         return `${randomatic('a')}${randomatic('aA0', 10)}${randomatic('0')}`;
+      case 'UPPERCASE_LETTERS':
+        return randomatic('A', 10);
       case 'USERNAME':
         return randomatic('aA', 8);
     }

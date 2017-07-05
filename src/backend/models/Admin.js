@@ -149,7 +149,8 @@ class Admin {
         return utils.Crypt.hashPlainText(newPlainTextPassword);
       })
       .then(newHashedPassword => {
-        sql = `UPDATE ${this._database.schema}.admin SET password = $1 WHERE id = $2;`;
+        sql = `UPDATE ${this._database.schema}.admin ` +
+          'SET password = $1, modified_at = NOW() WHERE id = $2;';
         args = [newHashedPassword, id];
         return this._database.execute(sql, args);
       });

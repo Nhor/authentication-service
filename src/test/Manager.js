@@ -99,6 +99,28 @@ class Manager {
       `DELETE FROM ${Helpers.DATABASE_SCHEMA}.admin_permission_xref WHERE admin_id = $1;`,
       [adminId]);
   }
+
+  /**
+   * Remove service with given identifier.
+   * @param {Number} serviceId - Service identifier.
+   * @return {Promise} Resolved promise.
+   */
+  static removeService(serviceId) {
+    return Helpers
+      .databaseExecute(`DELETE FROM ${Helpers.DATABASE_SCHEMA}.service WHERE id = $1 RETURNING code;`, [serviceId])
+      .then(result => Helpers.databaseExecute(`DROP TABLE ${Helpers.DATABASE_SCHEMA}.service_${_.get(_.first(result), 'code')}_user CASCADE;`, []));
+  }
+
+  /**
+   * Remove all service admins from service with given identifier.
+   * @param {Number} serviceId - Service identifier.
+   * @return {Promise} Resolved promise.
+   */
+  static removeAllServiceAdmins(serviceId) {
+    return Helpers.databaseExecute(
+      `DELETE FROM ${Helpers.DATABASE_SCHEMA}.service_admin_xref WHERE service_id = $1;`,
+      [serviceId]);
+  }
 }
 
 module.exports = Manager;

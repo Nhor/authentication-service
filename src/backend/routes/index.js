@@ -6,3 +6,4 @@ module.exports.admin.Logout = require('./admin/Logout');
 module.exports.admin.ChangePassword = require('./admin/ChangePassword');
 module.exports.admin.permissions.Grant = require('./admin/permissions/Grant');
 module.exports.admin.permissions.Revoke = require('./admin/permissions/Revoke');
+module.exports.service = require('./service');

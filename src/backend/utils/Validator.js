@@ -4,6 +4,17 @@ const Error = require('./Error');
 class Validator {
 
   /**
+   * Check if value is a valid code value.
+   * Code must contain minimum two characters, only lowercase letters, numbers and `_` symbol, and be no longer than 16 characters.
+   * @param {any} val - Value to validate.
+   * @return {Boolean} `true` if validation was successful, `false` otherwise.
+   */
+  static CodeField(val) {
+    return _.isString(val)
+      && /^([a-z0-9_]){2,16}$/.test(val);
+  }
+
+  /**
    * Check if value is a valid email.
    * @param {any} val - Value to validate.
    * @return {Boolean} `true` if validation was successful, `false` otherwise.

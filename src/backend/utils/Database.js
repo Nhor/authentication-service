@@ -76,14 +76,15 @@ class Database {
    * Check if record with given conditions exist in given table.
    * @param {String} table - Database table name.
    * @param {Object} conditions - Object containing field names as keys and related values.
+   * @param {String} [connector] - Optional conditions connector ('AND' or 'OR').
    * @return {Promise} Resolved promise with `true` if record exists,
    *                   resolved promise with `false` if not.
    */
-  doesExist(table, conditions) {
+  doesExist(table, conditions, connector = 'AND') {
     let where = '';
     let args = [];
     _.each(conditions, (value, field) => {
-      where += `${_.size(args) ? ' AND ' : ''}${field} = $${_.size(args) + 1}`;
+      where += `${_.size(args) ? ` ${connector} ` : ''}${field} = $${_.size(args) + 1}`;
       args.push(value);
     });
     let sql = `SELECT EXISTS(SELECT 1 FROM ${this.schema}.${table} WHERE ${where});`;

@@ -3,6 +3,35 @@ const utils = require('../../../../backend/utils');
 const Helpers = require('../../../Helpers');
 
 describe('backend/utils/Validator', () => {
+  describe('CodeField', () => {
+    it('should return `false` for `undefined`', () =>
+      chai.expect(utils.Validator.CodeField(undefined)).to.be.false);
+    it('should return `false` for `null`', () =>
+      chai.expect(utils.Validator.CodeField(null)).to.be.false);
+    it('should return `false` for boolean', () =>
+      chai.expect(utils.Validator.CodeField(true)).to.be.false);
+    it('should return `false` for integer number', () =>
+      chai.expect(utils.Validator.CodeField(123)).to.be.false);
+    it('should return `false` for float number', () =>
+      chai.expect(utils.Validator.CodeField(123.456)).to.be.false);
+    it('should return `false` for object', () =>
+      chai.expect(utils.Validator.CodeField({})).to.be.false);
+    it('should return `false` for empty string', () =>
+      chai.expect(utils.Validator.CodeField('')).to.be.false);
+    it('should return `false` for string with invalid characters', () =>
+      chai.expect(utils.Validator.CodeField('code-')).to.be.false);
+    it('should return `false` for string with uppercase characters', () =>
+      chai.expect(utils.Validator.CodeField('Code')).to.be.false);
+    it('should return `false` for string with less than 2 characters', () =>
+      chai.expect(utils.Validator.CodeField('a')).to.be.false);
+    it('should return `true` for string with exactly 2 characters', () =>
+      chai.expect(utils.Validator.CodeField('ab')).to.be.true);
+    it('should return `true` for string with more than 2 letters', () =>
+      chai.expect(utils.Validator.UsernameField('c_od_e_1')).to.be.true);
+    it('should return `true` for random code', () =>
+      chai.expect(utils.Validator.UsernameField(Helpers.random(Helpers.RANDOM_TYPE.CODE))).to.be.true);
+  });
+
   describe('EmailField', () => {
     it('should return `false` for `undefined`', () =>
       chai.expect(utils.Validator.EmailField(undefined)).to.be.false);
